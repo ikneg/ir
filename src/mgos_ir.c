@@ -9,52 +9,54 @@
 static void irrecv_nec_handler(int pin, void *arg)
 {
   struct mgos_irrecv_nec_s *obj = (struct mgos_irrecv_nec_s *)arg;
-  // get microseconds
-  uint32_t t = 1000000 * mgos_uptime();
-  // 0-1 transition?
-  if (mgos_gpio_read(pin)) {
-    // start counter
-    obj->t = t;
-    return;
-  }
-  // 1-0 transition. stop counter
-  t -= obj->t;
-  // derive bit from pulse width
-  // 0
-  if (t < 1000) {
-    obj->code.dword <<= 1;
-    obj->code.byte[0] &= ~0b00000001;
-    ++obj->bit;
-  // 1
-  } else if (t < 2000) {
-    obj->code.dword <<= 1;
-    obj->code.byte[0] |= 0b00000001;
-    ++obj->bit;
-  // sequence start
-  } else if (t >= 4000) {
-    obj->bit = 0;
-  // repeat
-  } else {
-    // FIXME: just signal if pulse circa 2250?
-  }
-  // sequence end?
-  if (obj->bit == 32) {
-    obj->bit = 0; // NB: do not auto-repeat
-    // CRC ok?
-#if MGOS_IRRECV_NEC_CHECK_ADDR_CRC
-    if ((obj->code.byte[1] ^ obj->code.byte[0]) == 0xFF &&
-        (obj->code.byte[3] ^ obj->code.byte[2]) == 0xFF)
-#elif MGOS_IRRECV_NEC_CHECK_CODE_CRC
-    if ((obj->code.byte[1] ^ obj->code.byte[0]) == 0xFF)
-#endif
-    {
-      // report code
-      LOG(LL_DEBUG, ("IRRECV @ %d: %08X", pin, obj->code.dword));
-      if (obj->handler) {
-        obj->handler(obj->code.dword, obj->user_data);
-      }
-    }
-  }
+  obj->handler((int)123, obj->user_data);
+
+//  // get microseconds
+//  uint32_t t = 1000000 * mgos_uptime();
+//  // 0-1 transition?
+//  if (mgos_gpio_read(pin)) {
+//    // start counter
+//    obj->t = t;
+//    return;
+//  }
+//  // 1-0 transition. stop counter
+//  t -= obj->t;
+//  // derive bit from pulse width
+//  // 0
+//  if (t < 1000) {
+//    obj->code.dword <<= 1;
+//    obj->code.byte[0] &= ~0b00000001;
+//    ++obj->bit;
+//  // 1
+//  } else if (t < 2000) {
+//    obj->code.dword <<= 1;
+//    obj->code.byte[0] |= 0b00000001;
+//    ++obj->bit;
+//  // sequence start
+//  } else if (t >= 4000) {
+//    obj->bit = 0;
+//  // repeat
+//  } else {
+//    // FIXME: just signal if pulse circa 2250?
+//  }
+//  // sequence end?
+//  if (obj->bit == 32) {
+//    obj->bit = 0; // NB: do not auto-repeat
+//    // CRC ok?
+//#if MGOS_IRRECV_NEC_CHECK_ADDR_CRC
+//    if ((obj->code.byte[1] ^ obj->code.byte[0]) == 0xFF &&
+//        (obj->code.byte[3] ^ obj->code.byte[2]) == 0xFF)
+//#elif MGOS_IRRECV_NEC_CHECK_CODE_CRC
+//    if ((obj->code.byte[1] ^ obj->code.byte[0]) == 0xFF)
+//#endif
+//    {
+//      // report code
+//      LOG(LL_DEBUG, ("IRRECV @ %d: %08X", pin, obj->code.dword));
+//      if (obj->handler) {
+//        obj->handler(obj->code.dword, obj->user_data);
+//      }
+//    }
+//  }
 }
 
 struct mgos_irrecv_nec_s *mgos_irrecv_nec_create(int pin, void (*handler)(int, void *), void *user_data)
