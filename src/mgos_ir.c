@@ -9,7 +9,6 @@
 static void irrecv_nec_handler(int pin, void *arg)
 {
   struct mgos_irrecv_nec_s *obj = (struct mgos_irrecv_nec_s *)arg;
-  LOG(LL_INFO, ("IRRECV @ %d", pin));
   obj->handler((int)123, obj->user_data);
 
 //  // get microseconds
